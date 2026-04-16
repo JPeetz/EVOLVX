@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  evolvx:
+    image: ghcr.io/jpeetz/evolvx:latest
+    container_name: evolvx
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - evolvx_data:/app/data
+    environment:
+      - PORT=3000
+      - DATA_DIR=/app/data
+      - USE_UNIFIED_PIPELINE=true
+      - REGISTRY_DB_PATH=/app/data/registry.db
+      - JOURNAL_DB_PATH=/app/data/journal.db
+      - OPTIMIZER_DB_PATH=/app/data/optimizer.db
+      - EVENT_LOG_DIR=/app/data/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  evolvx_data:
+    driver: local
