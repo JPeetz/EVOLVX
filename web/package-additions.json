@@ -1,0 +1,37 @@
+{
+  "_comment": "EvolvX v1.1 UI — no new npm dependencies required.",
+  "_existing_deps_used": {
+    "react": "Already in NOFX",
+    "react-router-dom": "Already in NOFX",
+    "recharts": "Already in NOFX — used for AreaChart, BarChart",
+    "swr": "Already in NOFX — used for all data fetching",
+    "tailwindcss": "Already in NOFX — all styling via utility classes"
+  },
+  "_font": {
+    "note": "Optional: add JetBrains Mono for number rendering. Add this to web/index.html <head>:",
+    "link": "<link href='https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap' rel='stylesheet' />"
+  },
+  "_tailwind_config": {
+    "note": "Optional: add fontFamily override to tailwind.config.js for better mono rendering",
+    "addition": {
+      "theme": {
+        "extend": {
+          "fontFamily": {
+            "mono": ["'JetBrains Mono'", "ui-monospace", "SFMono-Regular", "monospace"]
+          }
+        }
+      }
+    }
+  },
+  "_files_added": [
+    "web/src/lib/evolvx-api.ts          — typed API client for registry/journal/optimizer",
+    "web/src/components/evolvx/ui.tsx   — shared primitives: badges, cards, buttons, modals",
+    "web/src/components/evolvx/LineageGraph.tsx   — SVG lineage tree",
+    "web/src/components/evolvx/OutcomeHeatmap.tsx — GitHub-style outcome calendar",
+    "web/src/components/evolvx/StrategyDiff.tsx   — side-by-side parameter diff modal",
+    "web/src/pages/Registry.tsx          — strategy registry page",
+    "web/src/pages/Journal.tsx           — decision journal dashboard",
+    "web/src/pages/Optimizer.tsx         — optimization job runner",
+    "web/src/router-additions.tsx        — route + nav integration guide"
+  ]
+}
