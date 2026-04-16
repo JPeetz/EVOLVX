@@ -590,14 +590,28 @@ EvolvX/
 │   └── migrate/
 │       └── main.go               ← one-time CLI migration tool
 │
+├── web/src/                      ← v1.1 UI additions (drop into existing NOFX web/)
+│   ├── lib/
+│   │   └── evolvx-api.ts         ← typed API client for all EvolvX endpoints
+│   ├── components/evolvx/
+│   │   ├── ui.tsx                ← shared primitives: badges, cards, buttons, modals
+│   │   ├── LineageGraph.tsx      ← SVG strategy evolution tree
+│   │   ├── OutcomeHeatmap.tsx    ← GitHub-style outcome calendar heatmap
+│   │   └── StrategyDiff.tsx      ← side-by-side parameter diff modal
+│   ├── pages/
+│   │   ├── Registry.tsx          ← version history + lineage + approve/deprecate
+│   │   ├── Journal.tsx           ← heatmap + timeline + decision table + detail modal
+│   │   └── Optimizer.tsx         ← job runner + candidate comparison + score chart
+│   └── router-additions.tsx      ← route + nav integration guide
+│
 ├── [existing NOFX packages]      ← UNCHANGED
-│   ├── trader/                   
-│   ├── decision/                 
-│   ├── market/                   
-│   ├── mcp/                      
-│   ├── store/                    
-│   ├── backtest/                 
-│   └── web/                      
+│   ├── trader/
+│   ├── decision/
+│   ├── market/
+│   ├── mcp/
+│   ├── store/
+│   ├── backtest/
+│   └── web/
 │
 └── docs/
     ├── ARCHITECTURE.md
@@ -609,45 +623,54 @@ EvolvX/
 
 ## Comparison: NOFX vs EvolvX
 
-| Capability | NOFX | EvolvX |
-|---|---|---|
-| AI trading (multi-model) | ✅ | ✅ unchanged |
-| Multi-exchange support | ✅ | ✅ unchanged |
-| Strategy Studio UI | ✅ | ✅ unchanged |
-| AI Debate Arena | ✅ | ✅ unchanged |
-| Real-time dashboard | ✅ | ✅ unchanged |
-| Backtest engine | ✅ | ✅ unified pipeline |
-| Paper trading | ❌ | ✅ new |
-| Unified execution layer | ❌ | ✅ new |
-| Strategy versioning | ❌ | ✅ new |
-| Immutable strategy records | ❌ | ✅ new |
-| Decision memory (durable) | partial | ✅ new |
-| Query decisions by outcome | ❌ | ✅ new |
-| Memory injected into AI prompt | ❌ | ✅ new |
-| Human approval gate | ❌ | ✅ new |
-| Walk-forward optimization | ❌ | ✅ new |
-| Overfitting protection | ❌ | ✅ new |
-| Strategy lineage graph | ❌ | ✅ new |
-| Reproducible backtests | ❌ | ✅ new |
-| Export/import strategies | ❌ | ✅ new |
+| Capability | NOFX | EvolvX v1.0 | EvolvX v1.1 |
+|---|---|---|---|
+| AI trading (multi-model) | ✅ | ✅ unchanged | ✅ unchanged |
+| Multi-exchange support | ✅ | ✅ unchanged | ✅ unchanged |
+| Strategy Studio UI | ✅ | ✅ unchanged | ✅ unchanged |
+| AI Debate Arena | ✅ | ✅ unchanged | ✅ unchanged |
+| Real-time dashboard | ✅ | ✅ unchanged | ✅ unchanged |
+| Backtest engine | ✅ | ✅ unified pipeline | ✅ unified pipeline |
+| Paper trading | ❌ | ✅ new | ✅ new |
+| Unified execution layer | ❌ | ✅ new | ✅ new |
+| Strategy versioning | ❌ | ✅ new | ✅ new |
+| Immutable strategy records | ❌ | ✅ new | ✅ new |
+| Decision memory (durable) | partial | ✅ new | ✅ new |
+| Query decisions by outcome | ❌ | ✅ new | ✅ new |
+| Memory injected into AI prompt | ❌ | ✅ new | ✅ new |
+| Human approval gate | ❌ | ✅ new | ✅ new |
+| Walk-forward optimization | ❌ | ✅ new | ✅ new |
+| Overfitting protection | ❌ | ✅ new | ✅ new |
+| Strategy lineage graph | ❌ | API only | ✅ visual SVG tree |
+| Reproducible backtests | ❌ | ✅ new | ✅ new |
+| Export/import strategies | ❌ | ✅ new | ✅ new |
+| Registry UI (version history) | ❌ | ❌ | ✅ new |
+| Outcome heatmap calendar | ❌ | ❌ | ✅ new |
+| Win/loss timeline + equity curve | ❌ | ❌ | ✅ new |
+| Optimizer job UI | ❌ | ❌ | ✅ new |
+| Candidate comparison table | ❌ | ❌ | ✅ new |
+| Strategy diff viewer | ❌ | ❌ | ✅ new |
 
 ---
 
 ## Roadmap
 
 ```
-v1.0  ─── Foundation (this release)
-      ✅  Unified pipeline (backtest + paper + live)
-      ✅  Strategy registry with semver + immutability
-      ✅  Decision journal with outcome tracking
-      ✅  Walk-forward optimizer with human gate
-      ✅  Migration tool from NOFX
+v1.0  ─── Foundation (released)
+      ✅  Unified pipeline (backtest + paper + live share one code path)
+      ✅  Strategy registry with semver versioning and immutability enforcement
+      ✅  Decision journal with durable per-decision memory and outcome tracking
+      ✅  Walk-forward optimizer with overfitting protection and human approval gate
+      ✅  One-time migration tool from existing NOFX databases
+      ✅  12 test suites verifying all core invariants
 
-v1.1  ─── UI Integration
-      ◻   Registry UI panel (version history, lineage graph)
-      ◻   Journal dashboard (outcome heatmaps, win/loss timeline)
-      ◻   Optimizer UI (job submission, candidate comparison)
-      ◻   Strategy diff viewer (compare versions side by side)
+v1.1  ─── UI Integration (released)
+      ✅  Registry panel — version history timeline, approve/deprecate actions, export
+      ✅  Lineage graph — interactive SVG tree showing parent→child strategy evolution
+      ✅  Journal dashboard — outcome heatmap, win/loss bars, cumulative equity curve
+      ✅  Decision table — filterable by strategy/symbol/outcome, full detail modal
+      ✅  Optimizer UI — job submission, candidate score chart, comparison table
+      ✅  Strategy diff viewer — side-by-side parameter comparison with delta highlighting
 
 v1.2  ─── Advanced Learning
       ◻   Multi-symbol walk-forward evaluation
@@ -720,7 +743,7 @@ git push origin feature/my-improvement
 # Open PR against main
 ```
 
-**Good first issues:** Look for the `good-first-issue` label. The UI integration for the registry and journal panels (v1.1) are well-scoped starting points.
+**Good first issues:** Look for the `good-first-issue` label. The v1.2 Advanced Learning items — particularly automatic outcome recording from exchange fills and regime-aware backtesting splits — are well-scoped starting points.
 
 **Architecture questions:** Open a Discussion rather than an Issue.
 
