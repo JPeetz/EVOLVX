@@ -31,23 +31,55 @@ export const EVOLVX_NAV_ITEMS = [
     label: 'Registry',
     icon: '🗂',
     description: 'Strategy version history & lineage',
-    badge: 'NEW',
+    badge: null,
   },
   {
     path: '/journal',
     label: 'Journal',
     icon: '📓',
     description: 'Decision memory & outcome analysis',
-    badge: 'NEW',
+    badge: null,
   },
   {
     path: '/optimizer',
     label: 'Optimizer',
     icon: '⚙️',
     description: 'Walk-forward strategy evolution',
-    badge: 'NEW',
+    badge: null,
+  },
+  {
+    path: '/intelligence',
+    label: 'Intelligence',
+    icon: '🧠',
+    description: 'Regime map · multi-symbol · ensemble voting',
+    badge: null,
+  },
+  {
+    path: '/audit',
+    label: 'Audit Log',
+    icon: '🔍',
+    description: 'Full pipeline event stream · session inspector',
+    badge: null,
+  },
+  {
+    path: '/attribution',
+    label: 'Attribution',
+    icon: '🏅',
+    description: 'Cross-strategy PnL · symbol memory · regime breakdown',
+    badge: 'v2.0',
   },
 ] as const
+
+// ─── Router additions for v1.3 ────────────────────────────────────────────────
+//
+// Add to your router:
+//
+// import Intelligence from './pages/Intelligence'   // already added in v1.2
+// import AuditLog     from './pages/AuditLog'
+//
+// <Route path="/intelligence"  element={<Intelligence />} />
+// <Route path="/audit"         element={<AuditLog />} />
+// <Route path="/attribution"   element={<Attribution />} />
 
 // ─── STEP 3: Example nav item component ──────────────────────────────────────
 //

@@ -153,4 +153,9 @@ type OptimizationJob struct {
 	CompletedAt     *time.Time          `json:"completed_at,omitempty"`
 	PromotedCount   int                 `json:"promoted_count"`
 	Candidates      []Candidate         `json:"candidates,omitempty"`
+
+	// v1.2: multi-symbol walk-forward
+	Symbols            []string `json:"symbols,omitempty"`             // empty = single-symbol (legacy)
+	MinConsistency     float64  `json:"min_consistency,omitempty"`     // e.g. 0.4
+	RegimeAware        bool     `json:"regime_aware,omitempty"`        // enable per-regime scoring
 }

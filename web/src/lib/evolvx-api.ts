@@ -381,8 +381,70 @@ export const optimizerApi = {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Formatting helpers shared across all pages
+// v1.2: Outcome, Regime, Ensemble types
 // ─────────────────────────────────────────────────────────────────────────────
+
+export type RegimeLabel = 'bull' | 'bear' | 'sideways' | 'volatile'
+
+export interface RegimeAnalysis {
+  symbol: string
+  coverage: Record<RegimeLabel, number>
+  windows: Array<{ label: RegimeLabel; from: string; to: string; bars: number }>
+  current_regime: RegimeLabel
+}
+
+export interface EnsembleVoter {
+  strategy_id: string
+  strategy_version: string
+  weight: number
+  last_action: SignalAction
+  last_confidence: number
+  win_rate: number
+  agreed: boolean
+}
+
+export interface EnsembleStatus {
+  symbol: string
+  agreed_action: SignalAction | 'hold'
+  weighted_confidence: number
+  quorum: number
+  voters: EnsembleVoter[]
+}
+
+export interface MultiSymbolEvalResult {
+  // Embeds EvalResult fields plus:
+  symbols: string[]
+  per_symbol: Record<string, EvalResult>
+  consistency_score: number
+  regime_fails?: string[]
+}
+
+// v1.2 API additions
+export const regimeApi = {
+  getAnalysis: (symbol: string) =>
+    req<RegimeAnalysis>(`/regime/${symbol}`),
+}
+
+export const ensembleApi = {
+  getStatus: (strategyId: string, symbol: string) =>
+    req<EnsembleStatus>(`/ensemble/${strategyId}/${symbol}`),
+}
+
+export const outcomeApi = {
+  getOpenPositions: () =>
+    req<Array<{
+      decision_id: string
+      symbol: string
+      side: string
+      entry_price: number
+      entry_qty: number
+      entry_time: string
+      strategy_id: string
+      strategy_version: string
+    }>>('/outcome/open'),
+}
+
+// fmt already exported above
 
 export const fmt = {
   pct: (v: number) => `${(v * 100).toFixed(2)}%`,

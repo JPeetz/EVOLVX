@@ -590,7 +590,42 @@ EvolvX/
 │   └── migrate/
 │       └── main.go               ← one-time CLI migration tool
 │
-├── web/src/                      ← v1.1 UI additions (drop into existing NOFX web/)
+├── outcome/
+│   ├── types.go                  ← OpenPosition, CloseEvent, ComputeOutcome
+│   └── recorder.go               ← automatic fill→journal outcome recording
+│
+├── regime/
+│   └── detector.go               ← bull/bear/sideways/volatile classifier + time windows
+│
+├── ensemble/
+│   └── voter.go                  ← weighted signal voting across strategy versions
+│
+├── observability/
+│   ├── metrics.go                ← 25 Prometheus metrics across all subsystems
+│   ├── server.go                 ← /metrics + /health + /info HTTP server (port 9090)
+│   └── instrument.go             ← typed helpers called by pipeline/registry/journal/etc
+│
+├── notifications/
+│   └── service.go                ← Slack + Telegram webhook alerts with rate limiting
+│
+├── dashboards/
+│   ├── evolvx_overview.json      ← Grafana dashboard (import directly)
+│   └── README.md                 ← setup guide: Prometheus scraping, Grafana provisioning
+│
+├── multitrader/
+│   └── hub.go                    ← SharedJournalHub — routes N traders into one journal
+│
+├── memory/
+│   └── symbol_store.go           ← cross-strategy symbol memory with prompt injection
+│
+├── attribution/
+│   └── engine.go                 ← PnL attribution by strategy/symbol/regime
+│
+├── compaction/
+│   ├── worker.go                 ← auto-compaction scheduler
+│   └── export_test.go            ← test exports
+│
+├── web/src/                      ← UI additions (drop into existing NOFX web/)
 │   ├── lib/
 │   │   └── evolvx-api.ts         ← typed API client for all EvolvX endpoints
 │   ├── components/evolvx/
@@ -601,8 +636,11 @@ EvolvX/
 │   ├── pages/
 │   │   ├── Registry.tsx          ← version history + lineage + approve/deprecate
 │   │   ├── Journal.tsx           ← heatmap + timeline + decision table + detail modal
-│   │   └── Optimizer.tsx         ← job runner + candidate comparison + score chart
-│   └── router-additions.tsx      ← route + nav integration guide
+│   │   ├── Optimizer.tsx         ← job runner + candidate comparison + score chart
+│   │   ├── Intelligence.tsx      ← regime map + multi-symbol + ensemble (v1.2)
+│   │   ├── AuditLog.tsx          ← full event stream, session inspector (v1.3)
+│   │   └── Attribution.tsx       ← cross-strategy PnL, symbol memory, regime (v2.0)
+│   └── router-additions.tsx      ← route + nav integration guide (6 routes total)
 │
 ├── [existing NOFX packages]      ← UNCHANGED
 │   ├── trader/
@@ -623,33 +661,38 @@ EvolvX/
 
 ## Comparison: NOFX vs EvolvX
 
-| Capability | NOFX | EvolvX v1.0 | EvolvX v1.1 |
-|---|---|---|---|
-| AI trading (multi-model) | ✅ | ✅ unchanged | ✅ unchanged |
-| Multi-exchange support | ✅ | ✅ unchanged | ✅ unchanged |
-| Strategy Studio UI | ✅ | ✅ unchanged | ✅ unchanged |
-| AI Debate Arena | ✅ | ✅ unchanged | ✅ unchanged |
-| Real-time dashboard | ✅ | ✅ unchanged | ✅ unchanged |
-| Backtest engine | ✅ | ✅ unified pipeline | ✅ unified pipeline |
-| Paper trading | ❌ | ✅ new | ✅ new |
-| Unified execution layer | ❌ | ✅ new | ✅ new |
-| Strategy versioning | ❌ | ✅ new | ✅ new |
-| Immutable strategy records | ❌ | ✅ new | ✅ new |
-| Decision memory (durable) | partial | ✅ new | ✅ new |
-| Query decisions by outcome | ❌ | ✅ new | ✅ new |
-| Memory injected into AI prompt | ❌ | ✅ new | ✅ new |
-| Human approval gate | ❌ | ✅ new | ✅ new |
-| Walk-forward optimization | ❌ | ✅ new | ✅ new |
-| Overfitting protection | ❌ | ✅ new | ✅ new |
-| Strategy lineage graph | ❌ | API only | ✅ visual SVG tree |
-| Reproducible backtests | ❌ | ✅ new | ✅ new |
-| Export/import strategies | ❌ | ✅ new | ✅ new |
-| Registry UI (version history) | ❌ | ❌ | ✅ new |
-| Outcome heatmap calendar | ❌ | ❌ | ✅ new |
-| Win/loss timeline + equity curve | ❌ | ❌ | ✅ new |
-| Optimizer job UI | ❌ | ❌ | ✅ new |
-| Candidate comparison table | ❌ | ❌ | ✅ new |
-| Strategy diff viewer | ❌ | ❌ | ✅ new |
+| Capability | NOFX | v1.0 | v1.1 | v1.2 | v1.3 | v2.0 |
+|---|---|---|---|---|---|---|
+| AI trading (multi-model) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Multi-exchange support | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Strategy Studio UI | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| AI Debate Arena | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Real-time dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Paper trading | ❌ | ✅ new | ✅ | ✅ | ✅ | ✅ |
+| Unified execution layer | ❌ | ✅ new | ✅ | ✅ | ✅ | ✅ |
+| Strategy versioning + immutability | ❌ | ✅ new | ✅ | ✅ | ✅ | ✅ |
+| Decision memory + journal | ❌ | ✅ new | ✅ | ✅ | ✅ | ✅ |
+| Human approval gate | ❌ | ✅ new | ✅ | ✅ | ✅ | ✅ |
+| Walk-forward optimization | ❌ | ✅ new | ✅ | ✅ | ✅ | ✅ |
+| Overfitting protection | ❌ | ✅ new | ✅ | ✅ | ✅ | ✅ |
+| Strategy lineage graph | ❌ | API only | ✅ UI | ✅ | ✅ | ✅ |
+| Registry UI (history, diff, export) | ❌ | ❌ | ✅ new | ✅ | ✅ | ✅ |
+| Journal dashboard (heatmap, timeline) | ❌ | ❌ | ✅ new | ✅ | ✅ | ✅ |
+| Optimizer job UI + candidate table | ❌ | ❌ | ✅ new | ✅ | ✅ | ✅ |
+| Strategy diff viewer | ❌ | ❌ | ✅ new | ✅ | ✅ | ✅ |
+| Automatic outcome recording | ❌ | ❌ | ❌ | ✅ new | ✅ | ✅ |
+| Multi-symbol walk-forward | ❌ | ❌ | ❌ | ✅ new | ✅ | ✅ |
+| Regime detection (bull/bear/sideways/volatile) | ❌ | ❌ | ❌ | ✅ new | ✅ | ✅ |
+| Ensemble voting across versions | ❌ | ❌ | ❌ | ✅ new | ✅ | ✅ |
+| Intelligence dashboard (UI) | ❌ | ❌ | ❌ | ✅ new | ✅ | ✅ |
+| Prometheus metrics (25 metrics) | ❌ | ❌ | ❌ | ❌ | ✅ new | ✅ |
+| Grafana dashboard templates | ❌ | ❌ | ❌ | ❌ | ✅ new | ✅ |
+| Slack / Telegram alerts | ❌ | ❌ | ❌ | ❌ | ✅ new | ✅ |
+| Audit log viewer (UI) | ❌ | ❌ | ❌ | ❌ | ✅ new | ✅ |
+| Shared journal hub (multi-trader) | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ new |
+| Cross-strategy attribution | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ new |
+| Symbol memory consolidation | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ new |
+| Auto-compaction with policy | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ new |
 
 ---
 
@@ -672,23 +715,24 @@ v1.1  ─── UI Integration (released)
       ✅  Optimizer UI — job submission, candidate score chart, comparison table
       ✅  Strategy diff viewer — side-by-side parameter comparison with delta highlighting
 
-v1.2  ─── Advanced Learning
-      ◻   Multi-symbol walk-forward evaluation
-      ◻   Regime-aware backtesting (bull/bear/sideways splits)
-      ◻   Ensemble strategy support (vote across versions)
-      ◻   Automatic outcome recording from exchange fills
+v1.2  ─── Advanced Learning (released)
+      ✅  Automatic outcome recording — fills matched to journal decisions in real-time
+      ✅  Multi-symbol walk-forward — evaluate candidates across all configured symbols
+      ✅  Regime-aware backtesting — bull/bear/sideways/volatile detection and per-regime scoring
+      ✅  Ensemble strategy support — weighted voting across approved versions with quorum gate
+      ✅  Intelligence dashboard — regime map, multi-symbol view, ensemble status UI
 
-v1.3  ─── Observability
-      ◻   Prometheus metrics export
-      ◻   Grafana dashboard templates
-      ◻   Slack/Telegram alerts for promotion events
-      ◻   Audit log viewer in UI
+v1.3  ─── Observability (released)
+      ✅  Prometheus metrics — 25 metrics across pipeline, registry, journal, optimizer, regime, ensemble
+      ✅  Grafana dashboard — overview dashboard with strategy/mode/symbol variables + alerting rules
+      ✅  Slack / Telegram alerts — promotion, approval, deprecation, job completion, large win/loss
+      ✅  Audit log viewer — full pipeline event stream, session inspector, kind/mode/date filters
 
-v2.0  ─── Multi-Trader Memory
-      ◻   Shared journal across trader instances
-      ◻   Cross-strategy performance attribution
-      ◻   Symbol-level memory consolidation
-      ◻   Auto-compaction with configurable retention policy
+v2.0  ─── Multi-Trader Memory (released)
+      ✅  Shared journal hub — all traders write to one journal, event broadcasting to subscribers
+      ✅  Cross-strategy attribution — PnL/WR breakdown by strategy version, symbol, and regime
+      ✅  Symbol memory consolidation — cross-strategy knowledge per symbol with prompt injection
+      ✅  Auto-compaction worker — scheduled retention policy enforcement per strategy status
 ```
 
 ---
@@ -743,7 +787,7 @@ git push origin feature/my-improvement
 # Open PR against main
 ```
 
-**Good first issues:** Look for the `good-first-issue` label. The v1.2 Advanced Learning items — particularly automatic outcome recording from exchange fills and regime-aware backtesting splits — are well-scoped starting points.
+**Good first issues:** Look for the `good-first-issue` label. All planned versions through v2.0 are shipped. Good starting points for new contributors: the two missing API handlers (`/api/v1/attribution/report` and `/api/v1/memory/symbols`), the `prometheus/client_golang` dependency declaration in `go.mod`, and Grafana alerting rule templates for drawdown and stalled-fills scenarios.
 
 **Architecture questions:** Open a Discussion rather than an Issue.
 
