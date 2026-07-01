@@ -29,6 +29,9 @@ import (
 //	GET    /registry/strategies/:id/lineage
 //	GET    /registry/strategies/:id/export/:version
 func RegisterRegistryRoutes(g *gin.RouterGroup, svc *registry.Service) {
+	// All strategy registry endpoints require authentication
+	g.Use(AuthMiddleware())
+
 	g.GET("/strategies/:id/versions", func(c *gin.Context) {
 		versions, err := svc.ListVersions(c.Param("id"))
 		if err != nil {
@@ -173,6 +176,9 @@ func RegisterRegistryRoutes(g *gin.RouterGroup, svc *registry.Service) {
 //	GET  /journal/summaries/:strategy_id/:version
 //	POST /journal/compact/:strategy_id/:version
 func RegisterJournalRoutes(g *gin.RouterGroup, svc *journal.Service) {
+	// All journal endpoints require authentication
+	g.Use(AuthMiddleware())
+
 	g.GET("/decisions", func(c *gin.Context) {
 		f := journal.QueryFilter{
 			StrategyID:      c.Query("strategy_id"),
@@ -282,6 +288,9 @@ func RegisterJournalRoutes(g *gin.RouterGroup, svc *journal.Service) {
 //	GET  /optimizer/jobs?strategy_id=X
 //	POST /optimizer/jobs/:job_id/run   (async)
 func RegisterOptimizerRoutes(g *gin.RouterGroup, svc *optimizer.Service) {
+	// All optimizer endpoints require authentication
+	g.Use(AuthMiddleware())
+
 	g.POST("/jobs", func(c *gin.Context) {
 		var req struct {
 			StrategyID      string                       `json:"strategy_id"`
